@@ -1,0 +1,91 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (C) 2021-2022 HandsomeYingyan <handsomeyingyan@gmail.com>
+ * Copyright (C) 2022 hyx0329 <hyx0329@outlook.com>
+ *
+ */
+ 
+/dts-v1/;
+#include "msm8916-handsome-openstick-common.dtsi"
+#include <dt-bindings/pinctrl/qcom,pmic-mpp.h>
+
+/ {
+	model = "Handsome OpenStick UFI_16_V3";
+	compatible = "handsome,openstick", "qcom,msm8916";
+
+	gpio-keys {
+		compatible = "gpio-keys";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		autorepeat;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_keys_default>;
+		label = "GPIO Buttons";
+
+		reset {
+			label = "Restart";
+			gpios = <&msmgpio 49 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
+
+	gpio-leds {
+		pinctrl-names = "default";
+		pinctrl-0 = <&msmgpio_leds>,
+					<&pm8916_mpps_leds>;
+
+		compatible = "gpio-leds";
+
+		blue {
+			label = "blue";
+			gpios = <&msmgpio 32 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "mmc0";
+			default-state = "off";
+		};
+
+		green {
+			label = "green";
+			gpios = <&pm8916_mpps 4 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "phy0tx";
+			default-state = "off";
+		};
+
+		red {
+			label = "red";
+			gpios = <&msmgpio 8 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+			default-state = "on";
+		};
+
+	};
+};
+
+&msmgpio {
+	gpio_keys_default: gpio_keys_default {
+		pins = "gpio49";
+		function = "gpio";
+
+		drive-strength = <8>;
+		input-enable;
+		bias-pull-up;
+	};
+
+	msmgpio_leds: msmgpio-leds {
+		pins = "gpio32";
+		function = "gpio";
+
+		bias-disabled;
+	};
+};
+
+&pm8916_mpps {
+	pm8916_mpps_leds: pm8916-mpps-leds {
+		pins = "mpp4";
+		function = "digital";
+
+		output-low;
+		qcom,dtest = <1>;
+		power-source = <PM8916_MPP_VPH>;
+	};
+};

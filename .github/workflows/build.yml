@@ -1,0 +1,41 @@
+name: Build kernel deb packages
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build kernel
+    runs-on: ubuntu-latest
+    container: debian:bookworm
+    steps:
+      - name: Prepare
+        run: |
+          apt-get -y update
+          apt-get -y install git lsb-release gcc-aarch64-linux-gnu bison flex libssl-dev debhelper bc rsync kmod cpio
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare repository
+        run: git config --global --add safe.directory "$(pwd)"
+
+      - name: Build
+        run: |
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          export ARCH=arm64
+          make ufi003_defconfig
+          make deb-pkg -j"$(($(grep -c processor < /proc/cpuinfo)*2))"
+
+      - name: Workaround actions/upload-artifact#176
+        run: echo "artifacts_path=$(realpath ..)" >> $GITHUB_ENV
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            arch/arm64/boot/Image.gz
+            ${{ env.artifacts_path }}/*.deb

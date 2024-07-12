@@ -1,0 +1,112 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (C) 2021-2022 HandsomeYingyan <handsomeyingyan@gmail.com>
+ *
+ */
+ 
+/dts-v1/;
+#include "msm8916-handsome-openstick-common.dtsi"
+#include "dt-bindings/leds/common.h"
+
+/ {
+	model = "Handsome OpenStick UFI003";
+	compatible = "handsome,openstick", "qcom,msm8916";
+
+	gpio-keys {
+		compatible = "gpio-keys";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		autorepeat;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_keys_default>;
+		label = "GPIO Buttons";
+
+		/* original is suspend */
+		reset {
+			label = "Restart";
+			gpios = <&msmgpio 37 GPIO_ACTIVE_HIGH>;
+			linux,code = <KEY_RESTART>;
+			debounce-interval = <60>;
+		};
+	};
+
+	leds {
+		pinctrl-names = "default";
+		pinctrl-0 = <&msmgpio_leds>;
+
+		compatible = "gpio-leds";
+
+		led-0 {
+			gpios = <&msmgpio 20 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_BLUE>;
+			linux,default-trigger = "phy0tx";
+			default-state = "off";
+			retain-state-suspended;
+		};
+
+		led-1 {
+			gpios = <&msmgpio 21 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_GREEN>;
+			default-state = "off";
+			retain-state-suspended;
+		};
+
+		led-2 {
+			gpios = <&msmgpio 22 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_RED>;
+			linux,default-trigger = "mmc0";
+			default-state = "on";
+			retain-state-suspended;
+		};
+
+		sim0-select {
+			label = "sim0_select";
+			gpios = <&msmgpio 2 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+			retain-state-suspended;
+		};
+
+		sim-enable {
+			label = "sim_enable";
+			gpios = <&msmgpio 1 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+			retain-state-suspended;
+		};
+
+		esim0-select {
+			label = "esim0_select";
+			gpios = <&msmgpio 0 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+			retain-state-suspended;
+		};
+
+		esim1-select {
+			label = "esim1_select";
+			gpios = <&msmgpio 3 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+			retain-state-suspended;
+		};
+
+	};
+};
+
+&msmgpio {
+	msmgpio_leds: msmgpio-leds {
+		pins = "gpio0","gpio1","gpio2","gpio3","gpio20","gpio21","gpio22";
+		function = "gpio";
+
+		drive-strength = <2>;
+		output-low;
+		bias-disabled;
+	};
+
+	gpio_keys_default: gpio_keys_default {
+		pins = "gpio37";
+		function = "gpio";
+
+		drive-strength = <8>;
+		input-enable;
+		bias-pull-down;
+	};
+};
