@@ -30,12 +30,14 @@ jobs:
           make ufi003_defconfig
           make deb-pkg -j"$(($(grep -c processor < /proc/cpuinfo)*2))"
 
-      - name: Workaround actions/upload-artifact#176
-        run: echo "artifacts_path=$(realpath ..)" >> $GITHUB_ENV
+      - name: Prepare artifacts
+        run: |
+          mv arch/arm64/boot/Image.gz ./
+          mv ../*.deb ./
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           path: |
-            arch/arm64/boot/Image.gz
-            ${{ env.artifacts_path }}/*.deb
+            Image.gz
+            *.deb
