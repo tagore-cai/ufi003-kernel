@@ -155,6 +155,7 @@
 		reset-gpios = <&tlmm 64 GPIO_ACTIVE_LOW>;
 
 		vcc-supply = <&pm8953_l10>;
+		vio-supply = <&pm8953_l5>;
 
 		touchscreen-size-x = <1080>;
 		touchscreen-size-y = <1920>;
