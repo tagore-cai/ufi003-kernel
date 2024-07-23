@@ -1,0 +1,40 @@
+name: Release kernel deb packages
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    name: Build kernel
+    runs-on: ubuntu-latest
+    container: debian:bookworm
+    steps:
+      - name: Prepare
+        run: |
+          apt-get -y update
+          apt-get -y install git lsb-release gcc-aarch64-linux-gnu bison flex libssl-dev libelf-dev debhelper bc rsync kmod cpio
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare repository
+        run: git config --global --add safe.directory "$(pwd)"
+
+      - name: Build
+        run: |
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          export ARCH=arm64
+          make ufi003_defconfig
+          make deb-pkg -j"$(($(grep -c processor < /proc/cpuinfo)*2))"
+
+      - name: Generate release info
+        run: git log -1 --format=%B > .change.txt
+
+      - name: Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: .change.txt
+          files: |
+            arch/arm64/boot/Image.gz
+            ../linux-*
