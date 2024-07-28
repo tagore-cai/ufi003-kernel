@@ -32,12 +32,42 @@ jobs:
 
       - name: Prepare artifacts
         run: |
-          mv arch/arm64/boot/Image.gz ./
-          mv ../*.deb ./
+          mkdir artifacts
+          mv arch/arm64/boot/Image.gz ../linux-image-*.deb ../linux-headers-*.deb artifacts/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: |
-            Image.gz
-            *.deb
+          name: kernel
+          path: artifacts/*
+
+  bootimg:
+    name: Make boot images
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install binfmt-support qemu-user-static mkbootimg
+          mkdir artifacts
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download kernel
+        uses: actions/download-artifact@v4
+        with:
+          name: kernel
+          path: artifacts
+
+      - name: Build
+        run: |
+          cd .github/scripts
+          sudo ./build_boot_img.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel and boot images
+          path: artifacts/*
