@@ -44,10 +44,10 @@ umount rootfs/proc
 umount rootfs/dev/pts
 umount rootfs/dev
 umount rootfs/sys
+cp rootfs/boot/vmlinuz* ./Image.gz
 cp rootfs/boot/initrd.img* ./initrd.img
 cp rootfs/usr/lib/linux-image*/qcom/*ufi003*.dtb ./
 
-mv ../../artifacts/Image.gz ./
 cat Image.gz $DTB_FILE > kernel-dtb
 mkbootimg \
     --base 0x80000000 \

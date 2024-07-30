@@ -31,9 +31,7 @@ jobs:
           make deb-pkg -j"$(($(grep -c processor < /proc/cpuinfo)*2))"
 
       - name: Prepare artifacts
-        run: |
-          mkdir artifacts
-          mv arch/arm64/boot/Image.gz ../linux-image-*.deb ../linux-headers-*.deb artifacts/
+        run: mkdir artifacts && mv ../linux-image-*.deb ../linux-headers-*.deb artifacts/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
