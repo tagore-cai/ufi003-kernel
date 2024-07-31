@@ -15,7 +15,7 @@ jobs:
       - name: Prepare
         run: |
           apt-get -y update
-          apt-get -y install git lsb-release gcc-aarch64-linux-gnu bison flex libssl-dev debhelper bc rsync kmod cpio
+          apt-get -y install git lsb-release gcc-aarch64-linux-gnu bison flex libssl-dev libelf-dev debhelper bc rsync kmod cpio
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,13 +31,41 @@ jobs:
           make deb-pkg -j"$(($(grep -c processor < /proc/cpuinfo)*2))"
 
       - name: Prepare artifacts
-        run: |
-          mv arch/arm64/boot/Image.gz ./
-          mv ../*.deb ./
+        run: mkdir artifacts && mv ../linux-image-*.deb ../linux-headers-*.deb artifacts/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: |
-            Image.gz
-            *.deb
+          name: kernel
+          path: artifacts/*
+
+  bootimg:
+    name: Make boot images
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install binfmt-support qemu-user-static mkbootimg
+          mkdir artifacts
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download kernel
+        uses: actions/download-artifact@v4
+        with:
+          name: kernel
+          path: artifacts
+
+      - name: Build
+        run: |
+          cd .github/scripts
+          sudo ./build_boot_img.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel and boot images
+          path: artifacts/*
